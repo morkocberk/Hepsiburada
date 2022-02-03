@@ -1,6 +1,7 @@
 ﻿using Business.Abstract;
 using Core.Constant;
 using Core.Utilities.FileReader.Abstract;
+using Data.Abstract;
 using Data.Entity;
 using System;
 using System.Collections.Generic;
@@ -14,18 +15,16 @@ namespace Business.Concrete
     public class CommandService : ICommandService
     {
         private readonly IFileStreamReader _fileStreamReader;
-        private List<Product> Products;
-        private List<Order> Orders;
-        private List<Campaign> Campaigns;
-        private int Time;
+        private readonly IOrderDataDal _orderDataDal;
+        private readonly IProductDataDal _productDataDal;
+        private readonly ICampaignDataDal _campaignDataDal;
 
-        public CommandService(IFileStreamReader fileStreamReader)
+        public CommandService(IFileStreamReader fileStreamReader, IOrderDataDal orderDataDal, IProductDataDal productDataDal, ICampaignDataDal campaignDataDal)
         {
             _fileStreamReader = fileStreamReader;
-            Products = new List<Product>();
-            Orders = new List<Order>();
-            Campaigns = new List<Campaign>();
-            Time = 0;
+            _orderDataDal = orderDataDal;
+            _productDataDal = productDataDal;
+            _campaignDataDal = campaignDataDal;
         }
 
         public void DefineCommand()
@@ -58,7 +57,7 @@ namespace Business.Concrete
                     Price = double.Parse(splittedCommand[2]),
                     Stock = int.Parse(splittedCommand[3])
                 };
-                Products.Add(product);
+                //Products.Add(product);
                 Console.WriteLine($"Product created; code {product.ProductCode}, price {product.Price}, stock {product.Stock}");
             }
             else if (type == COMMAND_TYPE.CREATECAMPAIGN)
@@ -71,14 +70,14 @@ namespace Business.Concrete
                     PriceManipulationLimit = double.Parse(splittedCommand[4]),
                     TargetSalesCount = int.Parse(splittedCommand[5])
                 };
-                if (Products.Any(x => x.ProductCode == campaign.ProductCode))
-                {
-                    Campaigns.Add(campaign);
-                    Console.WriteLine($"Campaign created; name {campaign.Name}, product {campaign.ProductCode}, " +
-                        $"duration {campaign.Duration}, limit {campaign.PriceManipulationLimit}, target sales count {campaign.TargetSalesCount}");
-                }
-                else
-                    Console.WriteLine("No product found for the ProductCode given.");
+                //if (Products.Any(x => x.ProductCode == campaign.ProductCode))
+                //{
+                //    Campaigns.Add(campaign);
+                //    Console.WriteLine($"Campaign created; name {campaign.Name}, product {campaign.ProductCode}, " +
+                //        $"duration {campaign.Duration}, limit {campaign.PriceManipulationLimit}, target sales count {campaign.TargetSalesCount}");
+                //}
+                //else
+                //    Console.WriteLine("No product found for the ProductCode given.");
             }
             else if (type == COMMAND_TYPE.CREATEORDER) //campigndeki bilgileri güncelle!
             {
@@ -87,23 +86,23 @@ namespace Business.Concrete
                     ProductCode = splittedCommand[1],
                     Quantity = int.Parse(splittedCommand[2])
                 };
-                if (Products.Any(x => x.ProductCode == order.ProductCode))
-                {
-                    Orders.Add(order);
-                    Console.WriteLine($"Order created; product {order.ProductCode}, quantity {order.Quantity}");
-                }
-                else
-                    Console.WriteLine("No product found for the ProductCode given.");
+                //if (Products.Any(x => x.ProductCode == order.ProductCode))
+                //{
+                //    Orders.Add(order);
+                //    Console.WriteLine($"Order created; product {order.ProductCode}, quantity {order.Quantity}");
+                //}
+                //else
+                //    Console.WriteLine("No product found for the ProductCode given.");
             }
             else if (type == COMMAND_TYPE.GETCAMPAINGINFO)
             {
                 var campaignName = splittedCommand[1];
-                var campaign = Campaigns.SingleOrDefault(x => string.Equals(x.Name, campaignName));
-                if (campaign != null)
-                    Console.WriteLine($"Campaign {campaign.Name} info; Status {campaign.Status}, Target Sales {campaign.TargetSalesCount}, Total Sales {campaign.TotalSales}, " +
-                        $"Turnover {campaign.Turnover}, Average Item Price {campaign.AverageItemPrice}");
-                else
-                    Console.WriteLine("Campaign not found!");
+                //var campaign = Campaigns.SingleOrDefault(x => string.Equals(x.Name, campaignName));
+                //if (campaign != null)
+                //    Console.WriteLine($"Campaign {campaign.Name} info; Status {campaign.Status}, Target Sales {campaign.TargetSalesCount}, Total Sales {campaign.TotalSales}, " +
+                //        $"Turnover {campaign.Turnover}, Average Item Price {campaign.AverageItemPrice}");
+                //else
+                //    Console.WriteLine("Campaign not found!");
             }
         }
 
