@@ -55,7 +55,7 @@ namespace Data.Repository
             if (dataList != null && dataList.Count == entities.Count)
             {
                 dataList.ForEach(data => entityList.Remove(data));
-                entities.ForEach(entity => entityList.Add(entity));
+                entityList.AddRange(entities);
             }
             else
                 return false;

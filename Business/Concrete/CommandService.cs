@@ -34,6 +34,7 @@ namespace Business.Concrete
         {
             Console.Write("Please indicate the file name located in the running exe path to start the reading procedure: ");
             var fileName = Console.ReadLine();
+            Console.Write("\n\n");
             var filePath = new StringBuilder(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)).Append("\\").Append(fileName).ToString();
             var commands = _fileStreamReader.ReadAllLines(filePath);
             COMMAND_TYPE commandType;
