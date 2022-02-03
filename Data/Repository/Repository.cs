@@ -43,8 +43,10 @@ namespace Data.Repository
             {
                 entityList.Remove(data);
                 entityList.Add(entity);
+                return true;
             }
-            return entity;
+            return false;
+            
         }
 
         public bool BulkUpdate(Func<TEntity, bool> filter, List<TEntity> entities)
