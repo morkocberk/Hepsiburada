@@ -10,9 +10,14 @@ namespace Data.Entity
         public int Duration { get; set; }
         public double PriceManipulationLimit { get; set; }
         public int TargetSalesCount { get; set; }
-        public bool Status { get; set; }
+        public STATUS Status { get; set; }
         public int TotalSales { get; set; }
-        public int Turnover { get; set; }
+        public double Turnover { get; set; }
         public double AverageItemPrice { get; set; }
+    }
+    public enum STATUS
+    {
+        ACTIVE,
+        PASSIVE
     }
 }

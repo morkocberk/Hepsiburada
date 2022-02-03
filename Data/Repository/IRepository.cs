@@ -6,10 +6,13 @@ using System.Text;
 
 namespace Data.Repository
 {
-    public interface IRepository<T> where T: IBaseEntity
+    public interface IRepository<TEntity> where TEntity: IBaseEntity
     {
-        public List<T> GetAll();
-        public void Insert(T entity);
-        List<T> GetList(Func<T, bool> filter = null);
+        public List<TEntity> GetAll();
+        public void Insert(TEntity entity);
+        List<TEntity> GetList(Func<TEntity, bool> filter = null);
+        bool Any(Func<TEntity, bool> filter);
+        TEntity Get(Func<TEntity, bool> filter);
+        TEntity Update(Func<TEntity, bool> filter, TEntity entity);
     }
 }

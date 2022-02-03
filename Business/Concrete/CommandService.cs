@@ -18,6 +18,7 @@ namespace Business.Concrete
         private readonly IOrderDataDal _orderDataDal;
         private readonly IProductDataDal _productDataDal;
         private readonly ICampaignDataDal _campaignDataDal;
+        private int Time;
 
         public CommandService(IFileStreamReader fileStreamReader, IOrderDataDal orderDataDal, IProductDataDal productDataDal, ICampaignDataDal campaignDataDal)
         {
@@ -25,6 +26,7 @@ namespace Business.Concrete
             _orderDataDal = orderDataDal;
             _productDataDal = productDataDal;
             _campaignDataDal = campaignDataDal;
+            Time = 0;
         }
 
         public void DefineCommand()
@@ -46,54 +48,15 @@ namespace Business.Concrete
                 }
             }
         }
-        public void ExecuteCommand(string command, COMMAND_TYPE type)
+        private void ExecuteCommand(string command, COMMAND_TYPE type)
         {
             var splittedCommand = command.Split(' ');
             if (type == COMMAND_TYPE.CREATEPRODUCT)
-            {
-                var product = new Product
-                {
-                    ProductCode = splittedCommand[1],
-                    Price = double.Parse(splittedCommand[2]),
-                    Stock = int.Parse(splittedCommand[3])
-                };
-                //Products.Add(product);
-                Console.WriteLine($"Product created; code {product.ProductCode}, price {product.Price}, stock {product.Stock}");
-            }
+                CreateProduct(splittedCommand);
             else if (type == COMMAND_TYPE.CREATECAMPAIGN)
-            {
-                var campaign = new Campaign
-                {
-                    Name = splittedCommand[1],
-                    ProductCode = splittedCommand[2],
-                    Duration = int.Parse(splittedCommand[3]),
-                    PriceManipulationLimit = double.Parse(splittedCommand[4]),
-                    TargetSalesCount = int.Parse(splittedCommand[5])
-                };
-                //if (Products.Any(x => x.ProductCode == campaign.ProductCode))
-                //{
-                //    Campaigns.Add(campaign);
-                //    Console.WriteLine($"Campaign created; name {campaign.Name}, product {campaign.ProductCode}, " +
-                //        $"duration {campaign.Duration}, limit {campaign.PriceManipulationLimit}, target sales count {campaign.TargetSalesCount}");
-                //}
-                //else
-                //    Console.WriteLine("No product found for the ProductCode given.");
-            }
+                CreateCampaign(splittedCommand);
             else if (type == COMMAND_TYPE.CREATEORDER) //campigndeki bilgileri güncelle!
-            {
-                var order = new Order
-                {
-                    ProductCode = splittedCommand[1],
-                    Quantity = int.Parse(splittedCommand[2])
-                };
-                //if (Products.Any(x => x.ProductCode == order.ProductCode))
-                //{
-                //    Orders.Add(order);
-                //    Console.WriteLine($"Order created; product {order.ProductCode}, quantity {order.Quantity}");
-                //}
-                //else
-                //    Console.WriteLine("No product found for the ProductCode given.");
-            }
+                CreateOrder(splittedCommand);
             else if (type == COMMAND_TYPE.GETCAMPAINGINFO)
             {
                 var campaignName = splittedCommand[1];
@@ -105,8 +68,61 @@ namespace Business.Concrete
                 //    Console.WriteLine("Campaign not found!");
             }
         }
-
-        public COMMAND_TYPE ValidateCommand(string command)
+        private void CreateOrder(string[] splittedCommand)
+        {
+            var order = new Order
+            {
+                ProductCode = splittedCommand[1],
+                Quantity = int.Parse(splittedCommand[2])
+            };
+            if (_productDataDal.Any(x => x.ProductCode == order.ProductCode))
+            {
+                _orderDataDal.Insert(order);
+                Console.WriteLine($"Order created; product {order.ProductCode}, quantity {order.Quantity}");
+                var campaign = _campaignDataDal.Get(x => x.ProductCode == order.ProductCode && x.Status == STATUS.ACTIVE);
+                if (campaign != null)
+                {
+                    var product = _productDataDal.Get(x => x.ProductCode == order.ProductCode);
+                    var productPrice = CalculateDiscountedPrice(product.Price, campaign.PriceManipulationLimit);
+                    campaign.Turnover += productPrice;
+                    campaign.AverageItemPrice = ((campaign.AverageItemPrice * campaign.TotalSales) + productPrice) / (campaign.TotalSales + 1);
+                    campaign.TotalSales += 1;
+                }
+            }
+            else
+                Console.WriteLine("No product found for the ProductCode given.");
+        }
+        private void CreateCampaign(string[] splittedCommand)
+        {
+            var campaign = new Campaign
+            {
+                Name = splittedCommand[1],
+                ProductCode = splittedCommand[2],
+                Duration = int.Parse(splittedCommand[3]),
+                PriceManipulationLimit = double.Parse(splittedCommand[4]),
+                TargetSalesCount = int.Parse(splittedCommand[5])
+            };
+            if (_productDataDal.Any(x => x.ProductCode == campaign.ProductCode))
+            {
+                _campaignDataDal.Insert(campaign);
+                Console.WriteLine($"Campaign created; name {campaign.Name}, product {campaign.ProductCode}, " +
+                    $"duration {campaign.Duration}, limit {campaign.PriceManipulationLimit}, target sales count {campaign.TargetSalesCount}");
+            }
+            else
+                Console.WriteLine("No product found for the ProductCode given.");
+        }
+        private void CreateProduct(string[] splittedCommand)
+        {
+            var product = new Product
+            {
+                ProductCode = splittedCommand[1],
+                Price = double.Parse(splittedCommand[2]),
+                Stock = int.Parse(splittedCommand[3])
+            };
+            _productDataDal.Insert(product);
+            Console.WriteLine($"Product created; code {product.ProductCode}, price {product.Price}, stock {product.Stock}");
+        }
+        private COMMAND_TYPE ValidateCommand(string command)
         {
             var splittedCommand = command.Split(' ');
             if (string.Equals(splittedCommand[0], Command.CreateProduct))
@@ -142,6 +158,14 @@ namespace Business.Concrete
                     return COMMAND_TYPE.INCREASETIME;
             }
             return COMMAND_TYPE.UNDEFINED;
+        }
+
+        private double CalculateDiscountedPrice(double itemPrice, double manipulationLimit)
+        {
+            if (itemPrice - (Time * 5) >= (itemPrice * (100 - manipulationLimit) / 100))
+                return (itemPrice - (Time * 5));
+            else
+                return (itemPrice * (100 - manipulationLimit) / 100)
         }
     }
 }
