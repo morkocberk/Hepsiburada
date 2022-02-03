@@ -39,8 +39,25 @@ namespace Data.Repository
         public TEntity Update(Func<TEntity, bool> filter, TEntity entity)
         {
             var data = entityList.SingleOrDefault(filter);
-            data = entity;
-            return data;
+            if (data != null)
+            {
+                entityList.Remove(data);
+                entityList.Add(entity);
+            }
+            return entity;
+        }
+
+        public bool BulkUpdate(Func<TEntity, bool> filter, List<TEntity> entities)
+        {
+            var dataList = entityList.Where(filter).ToList();
+            if (dataList != null && dataList.Count == entities.Count)
+            {
+                dataList.ForEach(data => entityList.Remove(data));
+                entities.ForEach(entity => entityList.Add(entity));
+            }
+            else
+                return false;
+            return true;
         }
     }
 }

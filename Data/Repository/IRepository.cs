@@ -14,5 +14,6 @@ namespace Data.Repository
         bool Any(Func<TEntity, bool> filter);
         TEntity Get(Func<TEntity, bool> filter);
         TEntity Update(Func<TEntity, bool> filter, TEntity entity);
+        bool BulkUpdate(Func<TEntity, bool> filter, List<TEntity> entities);
     }
 }
