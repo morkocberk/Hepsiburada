@@ -13,7 +13,7 @@ namespace Data.Repository
         List<TEntity> GetList(Func<TEntity, bool> filter = null);
         bool Any(Func<TEntity, bool> filter);
         TEntity Get(Func<TEntity, bool> filter);
-        TEntity Update(Func<TEntity, bool> filter, TEntity entity);
+        bool Update(Func<TEntity, bool> filter, TEntity entity);
         bool BulkUpdate(Func<TEntity, bool> filter, List<TEntity> entities);
     }
 }

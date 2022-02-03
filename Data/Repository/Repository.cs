@@ -36,7 +36,7 @@ namespace Data.Repository
             entityList.Add(entity);
         }
 
-        public TEntity Update(Func<TEntity, bool> filter, TEntity entity)
+        public bool Update(Func<TEntity, bool> filter, TEntity entity)
         {
             var data = entityList.SingleOrDefault(filter);
             if (data != null)
