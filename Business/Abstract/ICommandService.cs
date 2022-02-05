@@ -7,6 +7,6 @@ namespace Business.Abstract
 {
     public interface ICommandService
     {
-        public void DefineCommand();
+        void CreateCommandWatcher();
     }
 }

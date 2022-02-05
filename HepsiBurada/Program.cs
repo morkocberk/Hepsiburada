@@ -15,14 +15,13 @@ namespace HepsiBurada
             {
                 var businessDependencies = BusinessDependencies.CreateHostBuilder(args).Build();
                 var commandService = businessDependencies.Services.GetService<ICommandService>();
-                commandService.DefineCommand();
+                commandService.CreateCommandWatcher();
+                Console.ReadKey();
             }
             catch (Exception)
             {
-
                 throw;
-            }
-            
+            }            
         }
     }
 }

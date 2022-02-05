@@ -2,6 +2,8 @@
 using Business.Concrete;
 using Core.Utilities.FileReader.Abstract;
 using Core.Utilities.FileReader.Concrete;
+using Core.Utilities.FileWatcher.Abstract;
+using Core.Utilities.FileWatcher.Concrete;
 using Data.Abstract;
 using Data.Concrete;
 using Microsoft.Extensions.DependencyInjection;
@@ -24,6 +26,7 @@ namespace Business.DependencyInjection
                     services.AddSingleton<IOrderDataDal, OrderDataDal>();
                     services.AddSingleton<IProductDataDal, ProductDataDal>();
                     services.AddSingleton<ICampaignDataDal, CampaignDataDal>();
+                    services.AddSingleton<IFileWatcher, FileWatcher>();
                 });
 
         }

@@ -10,6 +10,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using Core.Extension;
+using Core.Utilities.FileWatcher.Abstract;
 
 namespace Business.Concrete
 {
@@ -19,23 +20,29 @@ namespace Business.Concrete
         private readonly IOrderDataDal _orderDataDal;
         private readonly IProductDataDal _productDataDal;
         private readonly ICampaignDataDal _campaignDataDal;
+        private readonly IFileWatcher _fileWatcher;
         private int Time;
 
-        public CommandService(IFileStreamReader fileStreamReader, IOrderDataDal orderDataDal, IProductDataDal productDataDal, ICampaignDataDal campaignDataDal)
+        public CommandService(IFileStreamReader fileStreamReader, IOrderDataDal orderDataDal, IProductDataDal productDataDal, ICampaignDataDal campaignDataDal, IFileWatcher fileWatcher)
         {
             _fileStreamReader = fileStreamReader;
             _orderDataDal = orderDataDal;
             _productDataDal = productDataDal;
             _campaignDataDal = campaignDataDal;
+            _fileWatcher = fileWatcher;
             Time = 0;
         }
 
-        public void DefineCommand()
+        public void CreateCommandWatcher()
         {
-            Console.Write("Please indicate the file name located in the running exe path to start the reading procedure: ");
-            var fileName = Console.ReadLine();
+            Console.Write("Please add/copy the command file to the directory path of the application exe to start the reading procedure: ");
             Console.Write("\n\n");
-            var filePath = new StringBuilder(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)).Append("\\").Append(fileName).ToString();
+            var fw = _fileWatcher.CreateWatcher("txt", Path.GetDirectoryName(Assembly.GetEntryAssembly().Location));
+            fw.InvokeOnChange += ReadFile; 
+        }
+
+        private void DefineCommand(string filePath)
+        {            
             var commands = _fileStreamReader.ReadAllLines(filePath);
             COMMAND_TYPE commandType;
             foreach (var command in commands)
@@ -50,6 +57,14 @@ namespace Business.Concrete
                 }
             }
         }
+
+        private void ReadFile(object sender, FileSystemEventArgs e)
+        {
+            DefineCommand(e.FullPath);
+            _fileWatcher.Dispose();
+            Environment.Exit(0);
+        }
+
         private void ExecuteCommand(string command, COMMAND_TYPE type)
         {
             var splittedCommand = command.Split(' ');
